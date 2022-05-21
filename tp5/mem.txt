@@ -1,0 +1,14 @@
+ls
+ls
+./myhistory 10
+gcc -o myhistory myhistory.c
+./myhistory 5
+./myhistory 15
+exit
+./exit
+exit
+exit
+./exit
+exit(EXIT_SUCCESS)
+./exit
+./exit

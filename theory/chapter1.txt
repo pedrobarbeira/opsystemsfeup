@@ -1,0 +1,146 @@
+1)  Manage computer resources, establish user interface, execute and provide
+    services for application software
+
+2)  Having an GUI can be considered a waste of resources, since the GUI doesn't
+    improve the system's efficiency in any way. However it makes the interaction
+    with the human operator easier, more intuitive and pleasant. This is an 
+    example of such trade offs. If the resources are allocated towards something
+    that makes the system easier to use or more accessible to the human operator,
+    they are not wasted. At the end of the day the system is supposed to support
+    the human operator, not the other way around.
+
+3)  Real time systems must be very responsive and active. The programmer must
+    find a way to ensure that no clock cycles are wasted processing signals
+    or inputs. Failure to complete a task in the allocated time constraint
+    might cause the whole system to crash. This means that scheduling times
+    must enforce response times to respect the time constraint.
+
+4)  The system should include such applications in order to provide the user
+    with the programs and utilities he needs in order to perform the tasks
+    he wants to. The system should not include such applications in order to
+    allow the user the liberty to install whichever he likes best or feels
+    more appropriate to the job at hand - this would also make the system
+    lighter and easier to install.
+    The presence of these programs is really dependent on the proficiency
+    the user may or may not have with computing systems If a user is looking
+    for a utility tool to help him in his everyday work, he will probably
+    want the applications installed along with the system. If the user is
+    looking for a more custom-built, specialized system, chances are he will
+    appreciate not having applications previously installed
+
+5)  Kernel mode locks away certain system operations from the user. This means
+    that operations that access lower level resources, like memory in the case
+    of installing a program, will require an extra layer of authorization in 
+    order to be executed. This not only makes the system sturdier against external
+    attacks, but also add adds a confirmation layer when certain commands are
+    being run. The user might've made a mistake when running said command and
+    this extra layer will make it much easier and safer to undo it.
+
+6)  Issue a trap instruction, since these signal errors.
+
+7)  This scheme would make it very hard to update the operating system - the
+    machine would have to be formatted and the system reinstalled every time 
+    an update had to take place. It would also make the operating system 
+    extremely rigid - not only would the source code be locked, but it would
+    be impossible to change any module, like device drivers. 
+
+8)  Priviledged mode can be used during bootstrap, in order to access the ROM,
+    or in special system-related modifications, like kernel updates. User mode
+    can be used to run processes and manipulate registers.
+
+9)  The timer can be set to generate interrupts at a given frequency. We can
+    use a counter to keep track of how many interrupts have been generated
+    and use modular arithmetic to figure out when a second has passed. This
+    way we can keep track of time, provided an inital time reference - like
+    the time when the CPU was first plugged in - is provided.
+
+10) Caches allow us to access resources without the need to read them from
+    physical memory. Since physical memory has much slower access then volatile
+    memory the presence of a cache adds up to a great increase in system 
+    speed, as well as a decrease in CPU cycles spent fetching data from the disk.
+    Caches also allow us to keep frequently used data in volatile memory, there-
+    fore avoiding unecessary disk accesses. 
+    The biggest problem with cache is what should we keep i cache memory. This
+    is usually solved by fecthing the blocks around the block we want to, 
+    and layering the data so that less used data gets rewritten upon fetch.
+    Volatile memory is much more expensive then non-volatile memory. Computers
+    with a cache as large as a disk would be outside of the price range of most
+    users.
+
+11) Client-server has a client which requests data from a server, which in turn
+    sends the data. It's a hierarchical model where one side asks and the other
+    provides. Peer-to-peer is a more horizontal model, where each connected
+    machine can ask and send information to any other machine in the system.
+
+12)
+  a) The users actions may lead to concurrent memory access, which might lead tool
+     memory corruption and similar problems - integrity. The users may be able to 
+     access other user's files through system root, provided they have access to it 
+     - privacy.
+  b) Yes. We can implement certain restrictions on the users - for example, make the
+     filesystem of a particular user only accessible to him while denying all users
+     except sys admin the ability to get root access. We can implement proper process
+     management as a means to ensure no shared data is corrupted and no denial of 
+     service occurs, and proper memory management to ensure no private data is 
+     corrupted. 
+
+13)
+  a) Memory, CPU, storage, bandwith
+  b) memory, CPU
+  c) power consumption, memory
+
+14) If the user is working on a large task that's handled by a team and dependent
+    on the contributions of different team members, a time-sharing system may be
+    better for him, if said system is fast enough to accomodate both his and the
+    team's needs and able to get the job done.
+
+15) In symmetric multiprocessing all processors execute all tasks - usually the
+    job scheduler allocates tasks to the available CPU's in such a way that 
+    minimizes CPU idle time. In asymmetric multiprocessing each CPU is responsible
+    for a set of tasks he must perform, and sits idle if no such tasks are ready
+    to be processed. Multiprocessor systems allow us to run several programs in
+    parallel, they are much more efficient compared to a uniprocessor system - the
+    system can continue to process data while it waits for I/O or such, and can save
+    money by duplicating power supplies, housing and peripherals. However they are 
+    more complex to implement, both hardware-wise and software-wise
+
+16) Clustered systems are systems made up of different machines working together 
+    towards a goal, while multiprocessing can happen in the same machine. The machines
+    working together must have shared data space and have a way to synchronize them-
+    selves as to make sure the shared data stays updated and uncorrupted
+
+17) The cluster can either keep track of which entities are stored in each node, 
+    through a lookup table for example. This method relies on a very simple mapping
+    and is quite straight forward to implement, but database access would incurr in
+    some extra overhead each time a query was made - the process would have to figure
+    out which database to query - and lost data could not be retrieve.
+    The cluster could also duplicate the data between each node, with one of the nodes
+    acting as a backup. In this case there would be no overhead in queries, since
+    it wouldn't matter which machine was queried, and data could be retrieved if an
+    error shower up. We would only be using half our total storage space tho.
+
+18)
+
+19)
+
+20)
+
+21)
+
+22)
+
+23)
+
+24)
+
+25)
+
+26)
+
+27)
+
+28)
+
+29)
+
+30)

@@ -1,0 +1,19 @@
+1)In this case the pointer is used to pasas a variable by reference to
+a function. This means that any alteration the variable may suffer during
+the execution of the function will be reflected in main. It's a safe usage of
+pointers, and a very standard one at that. The stack is being used.
+
+2)In this case the programmer was trying to return a variable pointer through
+reference. This is not a safe usage of pointers, as we've seen in the bad_pointer
+code example. The memory isn't being allocated, therefore the scope of the
+variable is limited to the functions execution time: after it ends, the space will
+be freed, making the returned address invalid and generating a segfault. The
+address space being used is the stack
+
+3)Same as above, only this time the programmer did it properly. By using malloc
+the compiler knows it needs to allocate memory to that particular variable. The
+variable will be stored in the heap, therefore the usage is safe, and the returned
+address will be valid.
+
+4)In this case the pointer is used to reference the address where a function is 
+stored. The usafe is safe, and the memory space used is the stack.

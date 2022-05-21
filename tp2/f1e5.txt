@@ -1,0 +1,88 @@
+call_by_value)
+	add 	|		1  |
+			|	    2  |
+			|		 	|
+			
+	- swap gets called
+	add |		1  | 
+			|		2  |
+			|		1  |
+			|		2  |
+			|			|
+			
+	- temp is created
+	add |		1  | main n1
+			|		2  | main n2
+			|		1  | swap n1
+			|		2  | swap n2
+			|		1  | temp
+			
+	- numbers get swapped
+	add |		1  | main n1
+			|		2  | main n2
+			|		2  | swap n1
+			|		2  | swap n2
+			|		1  | temp
+			
+	add |		1  | main n1
+			|		2  | main n2
+			|		2  | swap n1
+			|		1  | swap n2
+			|		1  | temp
+			
+	- function returns
+	add |		1  | main n1
+			|		2  | main n2
+			|		    | swap n1
+			|		    | swap n2
+			|		    | temp
+			
+			
+			
+call_by_reference)
+	add 	|		1  | *p1
+			|	    2  | *p2
+			|		 	|
+			
+	- swap gets called
+	add |		1  | *p2
+			|		2  | *p2
+			|		1  | &n1
+			|		2  | &n2
+			|			|
+			
+	- temp is created
+	add |		1  | *p2
+			|		2  | *p2
+			|		1  | &n1
+			|		2  | &n2
+			|		1  | temp
+			
+	- numbers get swapped
+	add |		2  | *p2
+			|		2  | *p2
+			|		2  | &n1
+			|		2  | &n2
+			|		1  | temp
+			
+	add |		2  | *p2
+			|		1  | *p2
+			|		2  | &n1
+			|		1  | &n2
+			|		1  | temp
+			
+	- function returns
+	add |		2  | *p2
+			|		1  | *p2
+			|		    | &n1
+			|		    | &n2
+			|		    | temp
+			
+Sim. No primeiro os valores sao passados por valor - isto significa que swap
+recebe copias dos valores guardados em n1 e n2. Estas copias sao locais, 
+o que significa que, ao serem trocados em swap, apenas serao trocados no
+escopo da funcao, nao se refletindo em main.
+No segundo caso sao passadas referencias, ou seja, enderecos de memoria
+onde os valores estao guardados. Assim, a funcao swap esta a trocar os 
+valores na propria memoria, nao apenas localmente. Isto faz com que a troca
+se reflita em main

@@ -1,0 +1,33 @@
+#include <stdio.h>
+#define START 0
+#define ONE_TURN 360
+
+#include <math.h>
+
+double cos_table[ONE_TURN];
+double sin_table[ONE_TURN];
+
+void build_tables() {
+	int i;
+	for (i = START; i < ONE_TURN; i++) {
+		double val = M_PI * i / 180.0;
+		sin_table[i] = sin(val);
+		cos_table[i] = cos(val);
+	}
+}
+
+double sin_degrees(int angle) {
+	return sin_table[angle % ONE_TURN];
+}
+
+double cos_degrees(int angle) {
+	return cos_table[angle % ONE_TURN];
+}
+
+int main() {
+	build_tables();
+	printf("sin(20) = %f\n", sin_degrees(20));
+	printf("cos(80) = %f\n", cos_degrees(425));
+	printf("tan(60) = %f\n", sin_degrees(60) / cos_degrees(60));
+	return 0;
+}
