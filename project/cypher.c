@@ -1,7 +1,14 @@
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <fcntl.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+
+#define READ_END 0
+#define WRITE_END 1
 
 #define READ "r"
 #define BUFFERSIZE 256
@@ -47,23 +54,6 @@ cypher* loadCypher(cypher* cyphr){
     }while(target != NULL);
 
     return cyphr;
-}
-
-char* loadText(char* path, char* text){
-    int nbytes, bufferSize = BUFFERSIZE;
-    char* buff = (char*) malloc(sizeof(char) * bufferSize);
-    while(1){
-        FILE* f = fopen(path, "read");
-        nbytes = fread(buff, sizeof(char), bufferSize, f);
-        fclose(f);
-        if(nbytes == bufferSize){
-            bufferSize *= 2;
-            buff = (char*) malloc(sizeof(char) * bufferSize);
-        }
-        else break;
-    }
-    text = buff;
-    return text;
 }
 
 int hasPunct(int *where){
@@ -167,20 +157,90 @@ char* cypherText(cypher* cyphr, char* text){
     return cypheredText;
 }
 
+void flush(char* buffer){
+    for(int i = 0; i <BUFFERSIZE;i++)
+        buffer[i]='\0';
+}
+
 int main(int argc, char* argv[]){
-    if(argc != 2){
-        fprintf(stderr, "usage: %s filename\n", argv[0]);
+    int fd1[2], fd2[2], nbytes;
+    pid_t pid;
+    char buffer[BUFFERSIZE];
+    
+    if(pipe(fd1) < 0) {
+        perror( "fd1 pipe error\n");
         exit(EXIT_FAILURE);
     }
-    printf("Regular:\n");
-    char* text, *cypheredText; 
-    cypher* cyphr = (cypher*)malloc(sizeof(cypher));
-    cyphr = loadCypher(cyphr);
-    text = loadText(argv[1], text);
-    printf("%s", text);
-    cypheredText = cypherText(cyphr, text);
-    printf("\nCyphered:\n");
-    printf("%s", cypheredText);
-    
-    return 0;
+
+    if(pipe(fd2) < 0) {
+        perror("fd2 pipe error\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if ((pid = fork()) < 0) {
+        perror("fork error\n");
+        exit(EXIT_FAILURE);
+    }
+
+    if (pid > 0) {
+        int inbuffersize = BUFFERSIZE;
+        char* inbuffer = (char*)malloc(sizeof(char)*inbuffersize);
+        while(1){
+            nbytes = read(STDIN_FILENO, buffer, BUFFERSIZE);
+            if(nbytes == -1){
+                fprintf(stderr, "error reading input\n");
+                exit(EXIT_FAILURE);
+            }
+            strcat(inbuffer, buffer);
+            if(nbytes==BUFFERSIZE){
+                inbuffersize+=BUFFERSIZE;
+                inbuffer = (char*)realloc(inbuffer, inbuffersize);
+                flush(buffer);
+            }else break;
+        }
+        close(fd1[READ_END]);
+        write(fd1[WRITE_END], inbuffer, inbuffersize);
+        close(fd1[WRITE_END]);
+        waitpid(0, NULL, 0);
+        inbuffer = (char*)malloc(sizeof(char)*inbuffersize);
+        while(1){
+            nbytes = read(fd2[READ_END], buffer, BUFFERSIZE);
+            if(nbytes == -1){
+                fprintf(stderr, "error reading input\n");
+                exit(EXIT_FAILURE);
+            }
+            strcat(inbuffer, buffer);
+            flush(buffer);
+            if(nbytes < BUFFERSIZE) break;
+        }
+        write(STDOUT_FILENO, inbuffer, strlen(inbuffer));
+        exit(EXIT_SUCCESS);
+
+    } else {
+        int textsize = BUFFERSIZE;
+        char* text = (char*)malloc(sizeof(char)*textsize);
+        close(fd1[WRITE_END]);
+        while(1){
+            nbytes = read(fd1[READ_END], buffer, BUFFERSIZE);
+            if(nbytes == -1){
+                fprintf(stderr, "error reading input\n");
+                exit(EXIT_FAILURE);
+            }
+            strcat(text, buffer);
+            if(nbytes == textsize){
+                textsize+=BUFFERSIZE;
+                text = (char*)realloc(text, textsize);
+                flush(buffer);
+            }else break;
+        }
+        close(fd1[READ_END]);
+        cypher cyphr;
+        loadCypher(&cyphr);
+        char* cypheredtext = cypherText(&cyphr, text);
+        write(fd2[WRITE_END], cypheredtext, strlen(cypheredtext));
+        close(fd2[WRITE_END]);
+        
+        exit(EXIT_SUCCESS);
+    }
+    exit(EXIT_SUCCESS);
 }
