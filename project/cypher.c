@@ -190,7 +190,7 @@ char* cypherText(cypher* cyphr, char* text){
             foundWord=1;
         }
         if(foundWord){
-            int where;
+            int index, target;
             if(!compareCypher(cyphr, &index, &target)){
                 int where;
                 if(!hasPunct(&where)){
