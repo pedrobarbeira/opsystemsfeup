@@ -155,7 +155,7 @@ void cypherWord(char* cypher){
  */
 char* cypherText(cypher* cyphr, char* text){
     char* cypheredText;
-    strcpy(cypheredText, "\0");
+    strcat(cypheredText, "\0");
     int lastIndex = 0, foundWord = 0;
     for(int i = 0; i <strlen(text); i++){
         if(text[i] == ' ' || text[i] == '\n'){
