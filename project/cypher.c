@@ -153,9 +153,8 @@ void cypherWord(char* cypher){
  * @param text the text to be cyphered
  * @return char* pointer to the cyphered text
  */
-char* cypherText(cypher* cyphr, char* text){
-    char* cypheredText;
-    strcat(cypheredText, "\0");
+void cypherText(cypher* cyphr, char* text){
+    char* cypheredText = (char*)malloc(sizeof(char)*strlen(text));
     int lastIndex = 0, foundWord = 0;
     for(int i = 0; i <strlen(text); i++){
         if(text[i] == ' ' || text[i] == '\n'){
@@ -176,8 +175,8 @@ char* cypherText(cypher* cyphr, char* text){
             foundWord=0;
         }
     }
-    text = cypheredText;
-    return cypheredText;
+    strcpy(text, cypheredText);
+    free(cypheredText);
 }
 
 /**
@@ -226,15 +225,15 @@ char* rfrom(int fd, char* text){
  * @param text where the read text will be stored
  * @return char* pointer to the read text
  */
-char* rfromp(int fd[2], char* text){
+void rfromp(int fd[2], char* text){
     close(fd[WRITE_END]);
-    return rfrom(fd[READ_END], text);
+    rfrom(fd[READ_END], text);
+    close(fd[READ_END]);
 }
 
 int main(int argc, char* argv[]){
     int fd1[2], fd2[2], nbytes;
     pid_t pid;
-    char buffer[BUFFERSIZE];
     
     if(pipe(fd1) < 0) {
         perror( "fd1 pipe error\n");
@@ -257,17 +256,18 @@ int main(int argc, char* argv[]){
         write(fd1[WRITE_END], inbuffer, strlen(inbuffer));
         close(fd1[WRITE_END]);
         waitpid(0, NULL, 0);
-        inbuffer = rfromp(fd2, inbuffer);
+        rfromp(fd2, inbuffer);
         write(STDOUT_FILENO, inbuffer, strlen(inbuffer));
         exit(EXIT_SUCCESS);
 
     } else {
         int textsize = BUFFERSIZE;
-        char* text = rfromp(fd1, text);
+        char* text;
+        rfromp(fd1, text);
         cypher cyphr;
         loadCypher(&cyphr);
-        char* cypheredtext = cypherText(&cyphr, text);
-        write(fd2[WRITE_END], cypheredtext, strlen(cypheredtext));
+        cypherText(&cyphr, text);
+        write(fd2[WRITE_END], text, strlen(text));
         close(fd2[WRITE_END]);
         
         exit(EXIT_SUCCESS);
