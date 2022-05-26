@@ -4,32 +4,35 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#define READ 0
+#define WRITE 1
+
 int main(){
     int fd1[2], fd2[2];
     pid_t pid;
 
     pipe(fd1);
     pipe(fd2);
-    //redirect here
-        //parent replace fd1[WE] for STDIN
-        //child replace fd1[RE] FOR STDIN 
-        //parent replace fd2[RE] for STDOUT
-        //child replace fd2[WE] for STDOUT
 
     pid = fork();
 
     if(pid > 0){
-        dup2(fd1[0], STDIN_FILENO);
-        dup2(fd2[1], STDOUT_FILENO);
+        printf("stdi to fd1 write\n");
+        dup2(fd1[WRITE], STDIN_FILENO);
+        close(fd1[READ]);
+        printf("stdout to fd2 read\n");
+        dup2(fd2[READ], STDOUT_FILENO);
+        close(fd2[WRITE]);
+        waitpid(0, NULL, 0);
     }
     else{
-        dup2(fd1[1], STDOUT_FILENO);
-        dup2(fd2[0], STDIN_FILENO);
-        int nbytes;
-        char buffer[256];
-        nbytes= read(fd1[0], buffer, 256);
-        buffer[15]='x';
-        write(fd2[1], buffer, 256);
+        printf("stdin to fd1 read\n");
+        dup2(fd1[READ], STDIN_FILENO);
+        close(fd1[WRITE]);
+        printf("stdout to fd2 write\n");
+        dup2(fd2[WRITE], STDOUT_FILENO);
+        close(fd2[READ]);
+        printf("there\n");
         exit(EXIT_SUCCESS);
     }
     return 0;
