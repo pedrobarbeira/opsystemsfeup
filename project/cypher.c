@@ -74,7 +74,8 @@ cypher* loadCypher(cypher* cyphr){
  */
 int cmpwrd(char* w1, char* w2){
     int where;
-    if(strlen(w1) == strlen(w2) || strlen(w1) < strlen(w2)) return (!strcmp(w1, w2));
+    if(strlen(w1) == strlen(w2) || strlen(w1) < strlen(w2)) 
+        return (!strcmp(w1, w2));
     else{
         int i = 0, size;
         if(strlen(w1) < strlen(w2)) size = strlen(w1);
@@ -102,6 +103,12 @@ int cmpwrd(char* w1, char* w2){
  * @return int 0 if the wordBuffer is present in the cypher table, 1 otherwise
  */
 int compareCypher(cypher* cyphr, int* index, int* target){
+    if(*index >= cyphr->size){
+        fprintf(stderr, "tried to access invalid memory position\n"
+                        "source: compareCypher\n"
+                        "position: %d max: %d", *index, cyphr->size);
+        exit(EXIT_FAILURE);
+    }
     for(int i=0;i<cyphr->size;i++){
             if(!cmpwrd(wordBuffer, cyphr->table[i].target)){
                 if(cmpwrd(wordBuffer, cyphr->table[i].swap)){
@@ -200,21 +207,24 @@ void flush(char* buffer, int buffersize){
 char* rfrom(int fd, char* text){
     char buffer[BUFFERSIZE];
     int textsize = BUFFERSIZE, nbytes;
-    text = (char*)malloc(sizeof(char)*textsize);
+    char* textbuffer = (char*)malloc(sizeof(char)*textsize);
     while(1){
         nbytes = read(fd, buffer, BUFFERSIZE);
         if(nbytes == -1){
             fprintf(stderr, "error reading input\n");
-            return NULL;
+            exit(EXIT_FAILURE);
         }
-        strcat(text, buffer);
+        strcat(textbuffer, buffer);
         if(nbytes == textsize){
             textsize+=BUFFERSIZE;
-            text = (char*)realloc(text, textsize);
+            textbuffer = (char*)realloc(textbuffer, textsize);
             flush(buffer, BUFFERSIZE);
         }else break;
     }
     close(fd);
+    text = (char*)malloc(sizeof(char)*strlen(textbuffer));
+    strcpy(text, textbuffer);
+    free(textbuffer);
     return text;
 }
 
@@ -225,10 +235,11 @@ char* rfrom(int fd, char* text){
  * @param text where the read text will be stored
  * @return char* pointer to the read text
  */
-void rfromp(int fd[2], char* text){
+char* rfromp(int fd[2], char* text){
     close(fd[WRITE_END]);
-    rfrom(fd[READ_END], text);
+    text = rfrom(fd[READ_END], text);
     close(fd[READ_END]);
+    return text;
 }
 
 int main(int argc, char* argv[]){
@@ -256,20 +267,20 @@ int main(int argc, char* argv[]){
         write(fd1[WRITE_END], inbuffer, strlen(inbuffer));
         close(fd1[WRITE_END]);
         waitpid(0, NULL, 0);
-        rfromp(fd2, inbuffer);
+        inbuffer = rfromp(fd2, inbuffer);
         write(STDOUT_FILENO, inbuffer, strlen(inbuffer));
+        free(inbuffer);
         exit(EXIT_SUCCESS);
 
     } else {
         int textsize = BUFFERSIZE;
-        char* text;
-        rfromp(fd1, text);
+        char* text = rfromp(fd1, text);
         cypher cyphr;
         loadCypher(&cyphr);
         cypherText(&cyphr, text);
         write(fd2[WRITE_END], text, strlen(text));
         close(fd2[WRITE_END]);
-        
+        free(text);
         exit(EXIT_SUCCESS);
     }
     exit(EXIT_SUCCESS);
